@@ -1,0 +1,36 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "PlatformIO",
+            "task": "Build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$platformio"
+            ]
+        },
+        {
+            "type": "PlatformIO",
+            "task": "Upload",
+            "group": "build"
+        },
+        {
+            "type": "PlatformIO",
+            "task": "Upload and Monitor",
+            "group": "build"
+        },
+        {
+            "type": "PlatformIO",
+            "task": "Monitor",
+            "group": "build"
+        },
+        {
+            "type": "PlatformIO",
+            "task": "Clean",
+            "group": "build"
+        }
+    ]
+}

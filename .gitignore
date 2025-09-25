@@ -1,0 +1,26 @@
+# Ignore build artifacts
+build/
+sdkconfig
+sdkconfig.old
+.vscode/
+.idea/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Log files
+*.log
+
+# Dependencies
+managed_components/

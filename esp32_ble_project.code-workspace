@@ -1,0 +1,26 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "terminal.integrated.env.osx": {
+            "PATH": "/Users/${env:USER}/.platformio/penv/bin:${env:PATH}",
+            "PLATFORMIO_CALLER": "vscode"
+        },
+        "terminal.integrated.env.linux": {
+            "PATH": "${env:HOME}/.platformio/penv/bin:${env:PATH}",
+            "PLATFORMIO_CALLER": "vscode"
+        },
+        "terminal.integrated.env.windows": {
+            "PATH": "${env:USERPROFILE}\\.platformio\\penv\\Scripts;${env:PATH}",
+            "PLATFORMIO_CALLER": "vscode"
+        }
+    },
+    "extensions": {
+        "recommendations": [
+            "platformio.platformio-ide"
+        ]
+    }
+}

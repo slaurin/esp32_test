@@ -1,9 +1,9 @@
 #include "temperature_service.h"
 
 // Static member definitions
-float TemperatureService::currentTemp = 20.0f;
-float TemperatureService::maxTemp = 20.0f;
-float TemperatureService::minTemp = 20.0f;
+float TemperatureService::currentTemp = -20.0f;
+float TemperatureService::maxTemp = -100.0f;
+float TemperatureService::minTemp = 100.0f;
 TemperatureUnit TemperatureService::unit = CELSIUS;
 unsigned long TemperatureService::lastUpdateTime = 0;
 
@@ -84,7 +84,7 @@ bool TemperatureService::shouldUpdate() {
 float TemperatureService::generateFakeTemperature() {
     // Generate a fake temperature between 15 and 30 degrees Celsius
     // Using a simple pseudo-random variation based on time
-    float baseTemp = 22.5f; // Base temperature
+    float baseTemp = -10.5f; // Base temperature
     float variation = (float)(millis() % 1000) / 1000.0f * 10.0f - 5.0f; // -5 to +5 variation
     float temp = baseTemp + variation;
     

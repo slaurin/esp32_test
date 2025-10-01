@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "ble_server.h"
+#include "temperature_service.h"
 
 static const char* TAG = "ESP32_BLE_MAIN";
 
@@ -10,6 +11,9 @@ void setup() {
     // Add a small delay for serial to stabilize
     delay(1000);
     
+    // Initialize Temperature Service
+    TemperatureService::init();
+    
     // Initialize BLE Server
     BLEServerManager::init();
     
@@ -17,6 +21,23 @@ void setup() {
 }
 
 void loop() {
+    // Update temperature readings (checks internally if 30 seconds have passed)
+    TemperatureService::update();
+    
+    // Update BLE temperature characteristics with current values
+    BLEServerManager::updateTemperature(
+        TemperatureService::getCurrentTemperature(),
+        TemperatureService::getMaxTemperature(),
+        TemperatureService::getMinTemperature()
+    );
+    
+    // Notify connected clients about temperature updates every 30 seconds
+    static unsigned long lastTempNotify = 0;
+    if (BLEServerManager::isConnected() && (millis() - lastTempNotify >= 30000)) {
+        BLEServerManager::notifyTemperature();
+        lastTempNotify = millis();
+    }
+    
     // Run BLE server loop
     BLEServerManager::loop();
     

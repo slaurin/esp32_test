@@ -1,9 +1,15 @@
 #include "ble_server.h"
+#include "temperature_service.h"
 
 // Static member definitions
 NimBLEServer* BLEServerManager::pServer = nullptr;
 NimBLEService* BLEServerManager::pService = nullptr;
 NimBLECharacteristic* BLEServerManager::pCharacteristic = nullptr;
+NimBLEService* BLEServerManager::pTempService = nullptr;
+NimBLECharacteristic* BLEServerManager::pTempCharacteristic = nullptr;
+NimBLECharacteristic* BLEServerManager::pTempMaxCharacteristic = nullptr;
+NimBLECharacteristic* BLEServerManager::pTempMinCharacteristic = nullptr;
+NimBLECharacteristic* BLEServerManager::pTempConfigCharacteristic = nullptr;
 bool BLEServerManager::deviceConnected = false;
 bool BLEServerManager::oldDeviceConnected = false;
 uint32_t BLEServerManager::value = 0;
@@ -42,6 +48,24 @@ void MyCharacteristicCallbacks::onWrite(NimBLECharacteristic* pCharacteristic) {
     }
 }
 
+// Temperature config callback implementation
+void TempConfigCallbacks::onWrite(NimBLECharacteristic* pCharacteristic) {
+    std::string value = pCharacteristic->getValue();
+    
+    if (value.length() > 0) {
+        uint8_t unitValue = (uint8_t)value[0];
+        Serial.print("Temperature unit config write received: ");
+        Serial.println(unitValue);
+        
+        if (unitValue == 0 || unitValue == 1) {
+            TemperatureService::setUnit((TemperatureUnit)unitValue);
+            Serial.println("Temperature unit updated successfully");
+        } else {
+            Serial.println("Invalid temperature unit value. Use 0 for Celsius, 1 for Fahrenheit");
+        }
+    }
+}
+
 // BLE Server Manager implementations
 void BLEServerManager::init() {
     Serial.println("Initializing BLE Server...");
@@ -76,9 +100,44 @@ void BLEServerManager::init() {
     // Start the service
     pService->start();
 
+    // Create Environmental Sensing Service for temperature
+    pTempService = pServer->createService(ENV_SENSING_SERVICE_UUID);
+    
+    // Create Temperature Characteristics (all are READ and NOTIFY)
+    pTempCharacteristic = pTempService->createCharacteristic(
+                             TEMPERATURE_CHAR_UUID,
+                             NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY
+                           );
+    
+    pTempMaxCharacteristic = pTempService->createCharacteristic(
+                                TEMP_MAX_CHAR_UUID,
+                                NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY
+                              );
+    
+    pTempMinCharacteristic = pTempService->createCharacteristic(
+                                TEMP_MIN_CHAR_UUID,
+                                NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY
+                              );
+    
+    // Temperature config characteristic (READ and WRITE for unit configuration)
+    pTempConfigCharacteristic = pTempService->createCharacteristic(
+                                   TEMP_CONFIG_CHAR_UUID,
+                                   NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE
+                                 );
+    
+    pTempConfigCharacteristic->setCallbacks(new TempConfigCallbacks());
+    
+    // Set initial values
+    uint8_t initialUnit = (uint8_t)TemperatureService::getUnit();
+    pTempConfigCharacteristic->setValue(&initialUnit, 1);
+    
+    // Start the temperature service
+    pTempService->start();
+
     // Start advertising
     NimBLEAdvertising *pAdvertising = NimBLEDevice::getAdvertising();
     pAdvertising->addServiceUUID(SERVICE_UUID);
+    pAdvertising->addServiceUUID(ENV_SENSING_SERVICE_UUID);
     pAdvertising->setScanResponse(false);
     pAdvertising->setMinPreferred(0x0);  // set value to 0x00 to not advertise this parameter
     NimBLEDevice::startAdvertising();
@@ -87,6 +146,7 @@ void BLEServerManager::init() {
     Serial.println("Device name: " + String(DEVICE_NAME));
     Serial.println("Service UUID: " + String(SERVICE_UUID));
     Serial.println("Characteristic UUID: " + String(CHARACTERISTIC_UUID));
+    Serial.println("Temperature Service UUID: " + String(ENV_SENSING_SERVICE_UUID));
     Serial.println("Waiting for a client connection to notify...");
 }
 
@@ -131,5 +191,32 @@ void BLEServerManager::updateValue(const String& newValue) {
 void BLEServerManager::notify() {
     if (pCharacteristic && deviceConnected) {
         pCharacteristic->notify();
+    }
+}
+
+void BLEServerManager::updateTemperature(float current, float max, float min) {
+    if (pTempCharacteristic) {
+        // Convert float to int16_t for BLE (multiply by 100 to keep 2 decimal places)
+        int16_t currentInt = (int16_t)(current * 100);
+        int16_t maxInt = (int16_t)(max * 100);
+        int16_t minInt = (int16_t)(min * 100);
+        
+        pTempCharacteristic->setValue((uint8_t*)&currentInt, 2);
+        pTempMaxCharacteristic->setValue((uint8_t*)&maxInt, 2);
+        pTempMinCharacteristic->setValue((uint8_t*)&minInt, 2);
+    }
+}
+
+void BLEServerManager::notifyTemperature() {
+    if (deviceConnected) {
+        if (pTempCharacteristic) {
+            pTempCharacteristic->notify();
+        }
+        if (pTempMaxCharacteristic) {
+            pTempMaxCharacteristic->notify();
+        }
+        if (pTempMinCharacteristic) {
+            pTempMinCharacteristic->notify();
+        }
     }
 }

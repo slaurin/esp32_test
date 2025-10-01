@@ -8,6 +8,10 @@ A basic ESP32-S3 project implementing BLE (Bluetooth Low Energy) functionality u
 - NimBLE Bluetooth Low Energy stack
 - Basic GATT server with custom service and characteristic
 - Read/Write/Notify/Indicate operations
+- **Temperature Service** with Environmental Sensing Service (0x181A)
+- **Temperature monitoring** with current, max, and min values
+- **Configurable temperature units** (Celsius/Fahrenheit)
+- **Automatic updates** every 30 seconds
 - VSCode integration with PlatformIO
 - Serial debugging and monitoring
 
@@ -48,11 +52,22 @@ A basic ESP32-S3 project implementing BLE (Bluetooth Low Energy) functionality u
 
 ## BLE Service Details
 
-### Service UUID: 
+### Custom Service UUID: 
 `12345678-1234-1234-1234-123456789abc`
 
-### Characteristic UUID:
+### Custom Characteristic UUID:
 `87654321-4321-4321-4321-cba987654321`
+
+### Environmental Sensing Service UUID:
+`0000181A-0000-1000-8000-00805f9b34fb` (Standard BLE Environmental Sensing Service)
+
+### Temperature Characteristics:
+- **Current Temperature**: `00002A6E-0000-1000-8000-00805f9b34fb` (Read, Notify)
+- **Max Temperature**: `00002A6F-0000-1000-8000-00805f9b34fb` (Read, Notify)
+- **Min Temperature**: `00002A70-0000-1000-8000-00805f9b34fb` (Read, Notify)
+- **Temperature Config**: `00002A71-0000-1000-8000-00805f9b34fb` (Read, Write)
+  - Write `0` for Celsius
+  - Write `1` for Fahrenheit
 
 ### Supported Operations:
 - **Read**: Get current value from the characteristic
@@ -66,11 +81,16 @@ A basic ESP32-S3 project implementing BLE (Bluetooth Low Energy) functionality u
 2. **Open serial monitor** to see debug output
 3. **Connect using a BLE client** (smartphone app, computer, etc.)
    - Device name: `ESP32-S3-BLE-Device`
-   - Look for the custom service UUID
-4. **Interact with the characteristic**:
+   - Look for the Environmental Sensing Service (0x181A) or custom service UUID
+4. **Interact with the characteristics**:
    - Read to get current value
    - Write to send data to the device
    - Enable notifications to receive periodic updates
+5. **Monitor temperature**:
+   - Read temperature characteristics to get current, max, and min values
+   - Temperature updates automatically every 30 seconds
+   - Configure units by writing to the Temperature Config characteristic (0=Celsius, 1=Fahrenheit)
+   - Temperature values are sent as signed 16-bit integers (multiply by 100, e.g., 2250 = 22.50°C)
 
 ## BLE Client Apps for Testing
 

@@ -3,12 +3,12 @@
     "idf.adapterTargetName": "esp32s3",
     "idf.customExtraPaths": "",
     "idf.customExtraVars": {},
-    "idf.espIdfPath": "",
+    "idf.espIdfPath": "/home/slaurin/Applications/esp/esp-idf",
     "idf.openOcdConfigs": [
         "board/esp32s3-builtin.cfg"
     ],
     "idf.pythonBinPath": "",
-    "idf.toolsPath": "",
+    "idf.toolsPath": "/home/slaurin/.espressif",
     "terminal.integrated.env.osx": {
         "PATH": "/Users/${env:USER}/.platformio/penv/bin:${env:PATH}",
         "PLATFORMIO_CALLER": "vscode"
@@ -23,5 +23,7 @@
     },
     "files.associations": {
         "*.tcc": "cpp"
-    }
+    },
+    "idf.pythonInstallPath": "/home/slaurin/.espressif/python_env/idf6.0_py3.12_env/bin/python",
+    "idf.port": "/dev/ttyACM0"
 }

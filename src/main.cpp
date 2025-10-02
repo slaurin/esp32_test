@@ -1,4 +1,4 @@
-#include <Arduino.h>
+//#include <Arduino.h>
 #include "ble_server.h"
 #include "temperature_service.h"
 

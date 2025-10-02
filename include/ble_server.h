@@ -1,8 +1,22 @@
 #ifndef BLE_SERVER_H
 #define BLE_SERVER_H
 
+#ifdef ARDUINO
 #include <Arduino.h>
 #include <NimBLEDevice.h>
+#else
+#include <cstdint>
+#include <string>
+
+using String = std::string;
+
+inline void delay(uint32_t) {}
+inline unsigned long millis() { return 0; }
+
+class NimBLEServer;
+class NimBLEService;
+class NimBLECharacteristic;
+#endif
 
 // BLE Configuration
 #define DEVICE_NAME         "ESP32-S3-BLE-Device"
@@ -25,8 +39,10 @@ public:
     static bool isConnected();
     static void updateValue(const String& newValue);
     static void notify();
+    static void setDeviceConnectionState(bool connected);
 };
 
+#ifdef ARDUINO
 // Callback classes
 class MyServerCallbacks: public NimBLEServerCallbacks {
 public:
@@ -39,5 +55,6 @@ public:
     void onRead(NimBLECharacteristic* pCharacteristic);
     void onWrite(NimBLECharacteristic* pCharacteristic);
 };
+#endif
 
 #endif // BLE_SERVER_H

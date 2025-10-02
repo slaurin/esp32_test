@@ -1,4 +1,4 @@
-#include <Arduino.h>
+//#include <Arduino.h>
 #include "ble_server.h"
 
 static const char* TAG = "ESP32_BLE_MAIN";

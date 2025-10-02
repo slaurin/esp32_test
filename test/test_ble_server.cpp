@@ -1,5 +1,5 @@
 #include <unity.h>
-#include <Arduino.h>
+//#include <Arduino.h>
 #include "../src/ble_server.h"
 
 // Test that the BLE server can be initialized

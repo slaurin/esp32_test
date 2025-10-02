@@ -1,5 +1,7 @@
 #include "ble_server.h"
 
+#ifdef ARDUINO
+
 // Static member definitions
 NimBLEServer* BLEServerManager::pServer = nullptr;
 NimBLEService* BLEServerManager::pService = nullptr;
@@ -10,15 +12,15 @@ uint32_t BLEServerManager::value = 0;
 
 // Server callback implementations
 void MyServerCallbacks::onConnect(NimBLEServer* pServer) {
-    BLEServerManager::deviceConnected = true;
+    BLEServerManager::setDeviceConnectionState(true);
     Serial.println("Client connected");
-    
+
     // Start advertising again to allow multiple connections
     NimBLEDevice::startAdvertising();
 }
 
 void MyServerCallbacks::onDisconnect(NimBLEServer* pServer) {
-    BLEServerManager::deviceConnected = false;
+    BLEServerManager::setDeviceConnectionState(false);
     Serial.println("Client disconnected - start advertising");
 }
 
@@ -32,7 +34,7 @@ void MyCharacteristicCallbacks::onWrite(NimBLECharacteristic* pCharacteristic) {
     std::string value = pCharacteristic->getValue();
     Serial.print("Write request received. New value: ");
     Serial.println(value.c_str());
-    
+
     if (value.length() > 0) {
         Serial.print("Data written: ");
         for (int i = 0; i < value.length(); i++) {
@@ -48,7 +50,7 @@ void BLEServerManager::init() {
 
     // Initialize NimBLE
     NimBLEDevice::init(DEVICE_NAME);
-    
+
     // Set security
     NimBLEDevice::setSecurityAuth(true, true, true);
     NimBLEDevice::setSecurityPasskey(123456);
@@ -98,11 +100,11 @@ void BLEServerManager::loop() {
         String newValue = "Count: " + String(value);
         updateValue(newValue);
         notify();
-        
+
         Serial.println("Sent notification: " + newValue);
         delay(3000); // Delay between notifications
     }
-    
+
     // Handle disconnecting
     if (!deviceConnected && oldDeviceConnected) {
         delay(500); // Give the bluetooth stack the chance to get things ready
@@ -110,7 +112,7 @@ void BLEServerManager::loop() {
         Serial.println("Restarted advertising");
         oldDeviceConnected = deviceConnected;
     }
-    
+
     // Handle connecting
     if (deviceConnected && !oldDeviceConnected) {
         // Do stuff here on connecting
@@ -133,3 +135,35 @@ void BLEServerManager::notify() {
         pCharacteristic->notify();
     }
 }
+
+void BLEServerManager::setDeviceConnectionState(bool connected) {
+    deviceConnected = connected;
+}
+
+#else
+
+// Static member definitions for native/unit-test builds
+NimBLEServer* BLEServerManager::pServer = nullptr;
+NimBLEService* BLEServerManager::pService = nullptr;
+NimBLECharacteristic* BLEServerManager::pCharacteristic = nullptr;
+bool BLEServerManager::deviceConnected = false;
+bool BLEServerManager::oldDeviceConnected = false;
+uint32_t BLEServerManager::value = 0;
+
+void BLEServerManager::init() {}
+
+void BLEServerManager::loop() {}
+
+bool BLEServerManager::isConnected() {
+    return deviceConnected;
+}
+
+void BLEServerManager::updateValue(const String& /*newValue*/) {}
+
+void BLEServerManager::notify() {}
+
+void BLEServerManager::setDeviceConnectionState(bool connected) {
+    deviceConnected = connected;
+}
+
+#endif

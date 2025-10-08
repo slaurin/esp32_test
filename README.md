@@ -8,6 +8,7 @@ A basic ESP32-S3 project implementing BLE (Bluetooth Low Energy) functionality u
 - NimBLE Bluetooth Low Energy stack
 - Basic GATT server with custom service and characteristic
 - Read/Write/Notify/Indicate operations
+- **WiFi connectivity** with automatic reconnection
 - **Temperature Service** with Environmental Sensing Service (0x181A)
 - **Temperature monitoring** with current, max, and min values
 - **Configurable temperature units** (Celsius/Fahrenheit)
@@ -33,22 +34,80 @@ A basic ESP32-S3 project implementing BLE (Bluetooth Low Energy) functionality u
    cd esp32_test
    ```
 
-2. **Open in VSCode:**
+2. **Configure WiFi credentials:**
+   - Open `include/wifi_manager.h`
+   - Update `WIFI_SSID` with your WiFi network name
+   - Update `WIFI_PASSWORD` with your WiFi password
+
+3. **Open in VSCode:**
    - Open VSCode
    - Open the `esp32_ble_project.code-workspace` file
    - Install the recommended PlatformIO IDE extension if prompted
 
-3. **Build the project:**
+4. **Build the project:**
    - Open the PlatformIO terminal in VSCode (Ctrl+Shift+`)
    - Run: `pio run`
 
-4. **Upload to ESP32-S3:**
+5. **Upload to ESP32-S3:**
    - Connect your ESP32-S3 board via USB
    - Run: `pio run --target upload`
 
-5. **Monitor serial output:**
+6. **Monitor serial output:**
    - Run: `pio device monitor`
    - Or use the PlatformIO Serial Monitor in VSCode
+
+## WiFi Configuration
+
+The ESP32-S3 supports WiFi connectivity with automatic reconnection. 
+
+### Secure Configuration (Recommended)
+
+To keep your WiFi credentials secure and out of version control:
+
+1. **Add credentials to `platformio.ini`** (this file should be in `.gitignore`):
+   ```ini
+   [env:esp32-s3-devkitc-1-n16r8]
+   platform = espressif32
+   board = esp32-s3-devkitc-1
+   framework = arduino
+   build_flags = 
+       -D CONFIG_BT_ENABLED=1
+       -D CONFIG_BT_NIMBLE_ENABLED=1
+       -D WIFI_SSID='"YourNetworkName"'
+       -D WIFI_PASSWORD='"YourSecurePassword"'
+   ```
+   
+   **Note:** The double quotes inside single quotes are required for proper string handling.
+
+2. **Alternative: Use a separate config file** (also add to `.gitignore`):
+   Create `wifi_credentials.ini` with your credentials, then include it in `platformio.ini`:
+   ```ini
+   extra_configs = wifi_credentials.ini
+   ```
+
+### Simple Configuration (Development Only)
+
+For quick testing, you can set credentials in `include/wifi_manager.h`, but **never commit real credentials to version control**:
+   ```cpp
+   #define WIFI_SSID        "YourSSID"
+   #define WIFI_PASSWORD    "YourPassword"
+   ```
+
+### WiFi Features
+
+- Automatic connection on startup
+- Automatic reconnection if connection is lost
+- Connection timeout and retry logic
+- Status monitoring and reporting
+
+### WiFi Status Information
+
+- IP address
+- MAC address
+- Signal strength (RSSI)
+- Connection state
+
+The WiFi manager will automatically attempt to connect during startup and maintain the connection. Status updates are printed to the serial monitor every 30 seconds.
 
 ## BLE Service Details
 
@@ -112,8 +171,17 @@ A basic ESP32-S3 project implementing BLE (Bluetooth Low Energy) functionality u
 esp32_test/
 ├── .vscode/                    # VSCode configuration
 │   └── settings.json
+├── include/                    # Header files
+│   ├── ble_server.h           # BLE server declarations
+│   ├── temperature_service.h  # Temperature service declarations
+│   └── wifi_manager.h         # WiFi manager declarations
 ├── src/                        # Source code
-│   └── main.cpp               # Main application
+│   ├── main.cpp               # Main application
+│   ├── ble_server.cpp         # BLE server implementation
+│   ├── temperature_service.cpp # Temperature service implementation
+│   └── wifi_manager.cpp       # WiFi manager implementation
+├── docs/                       # Documentation
+├── test/                       # Unit tests
 ├── platformio.ini             # PlatformIO configuration
 ├── esp32_ble_project.code-workspace  # VSCode workspace
 ├── .gitignore                 # Git ignore rules

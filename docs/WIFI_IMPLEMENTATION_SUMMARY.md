@@ -190,13 +190,18 @@ Possible improvements for production use:
 
 ## Security Notes
 
-1. **Credentials in source**: Currently WiFi credentials are in header file
-   - For production, use secure storage
-   - Consider OTA or BLE-based configuration
+1. **Credentials storage**: Secure configuration methods implemented
+   - **Build flags**: Use `platformio.ini` build flags (recommended)
+   - **Conditional compilation**: Code uses `#ifndef` to allow build-time overrides
+   - **Development fallback**: Default values in header for testing only
+   - **Production options**: Can integrate with NVS storage or OTA/BLE configuration
    
 2. **Network security**: Ensure WiFi network uses WPA2/WPA3
 
-3. **Never commit credentials**: Use .gitignore or environment variables
+3. **Version control**: Credentials protection built-in
+   - `wifi_credentials.ini` added to `.gitignore`
+   - Example configuration file provided (`wifi_credentials.ini.example`)
+   - Build flags keep credentials out of source code
 
 ## Standards Compliance
 

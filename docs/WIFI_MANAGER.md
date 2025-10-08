@@ -17,13 +17,38 @@ The WiFi Manager provides basic WiFi connectivity for the ESP32-S3, allowing it 
 
 ## Configuration
 
-WiFi credentials are configured in `include/wifi_manager.h`:
+### Secure Configuration (Recommended)
+
+For security, WiFi credentials should **not** be hardcoded in source files. Instead, use build flags in `platformio.ini`:
+
+```ini
+[env:esp32-s3-devkitc-1-n16r8]
+build_flags = 
+    -D WIFI_SSID='"YourNetworkName"'
+    -D WIFI_PASSWORD='"YourSecurePassword"'
+```
+
+**Note:** The double quotes inside single quotes are required for proper string handling.
+
+**Security best practices:**
+- Add `platformio.ini` to `.gitignore` if it contains credentials
+- Or create a separate `wifi_credentials.ini` file (also gitignored) and include it:
+  ```ini
+  extra_configs = wifi_credentials.ini
+  ```
+- Never commit real WiFi credentials to version control
+
+### Development/Testing Configuration
+
+For quick testing only, you can set default values in `include/wifi_manager.h`:
 
 ```cpp
-#define WIFI_SSID        "YourSSID"        // Change to your WiFi network name
-#define WIFI_PASSWORD    "YourPassword"    // Change to your WiFi password
+#define WIFI_SSID        "YourSSID"        // Development only
+#define WIFI_PASSWORD    "YourPassword"    // Development only
 #define WIFI_TIMEOUT_MS  20000             // Connection timeout (20 seconds)
 ```
+
+The code will use build flags if defined, otherwise fall back to these defaults.
 
 ### Configuration Parameters
 
@@ -207,13 +232,18 @@ Possible improvements for production use:
 
 ## Security Considerations
 
-1. **Credentials in code**: Currently credentials are in source code
-   - For production, use secure storage (NVS, EEPROM)
-   - Consider WiFi Protected Setup (WPS) or SmartConfig
+1. **Credentials storage**: Multiple secure options available
+   - **Recommended**: Use build flags in `platformio.ini` (keep file out of version control)
+   - **Alternative**: Store in NVS (Non-Volatile Storage) for production deployments
+   - **Advanced**: Use WiFi Protected Setup (WPS) or SmartConfig for initial setup
+   - The implementation supports all methods via conditional compilation
    
 2. **Network security**: Ensure your WiFi network uses WPA2 or WPA3
    
-3. **Password protection**: Never commit credentials to public repositories
+3. **Version control**: Never commit real credentials to repositories
+   - Add `platformio.ini` to `.gitignore` if it contains credentials
+   - Or use a separate `wifi_credentials.ini` file that is gitignored
+   - The header file now uses `#ifndef` to allow build-time overrides
 
 ## Standards Compliance
 

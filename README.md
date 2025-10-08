@@ -58,25 +58,54 @@ A basic ESP32-S3 project implementing BLE (Bluetooth Low Energy) functionality u
 
 ## WiFi Configuration
 
-The ESP32-S3 supports WiFi connectivity with automatic reconnection. To configure:
+The ESP32-S3 supports WiFi connectivity with automatic reconnection. 
 
-1. **Set your credentials** in `include/wifi_manager.h`:
-   ```cpp
-   #define WIFI_SSID        "YourSSID"        // Change to your WiFi name
-   #define WIFI_PASSWORD    "YourPassword"    // Change to your WiFi password
+### Secure Configuration (Recommended)
+
+To keep your WiFi credentials secure and out of version control:
+
+1. **Add credentials to `platformio.ini`** (this file should be in `.gitignore`):
+   ```ini
+   [env:esp32-s3-devkitc-1-n16r8]
+   platform = espressif32
+   board = esp32-s3-devkitc-1
+   framework = arduino
+   build_flags = 
+       -D CONFIG_BT_ENABLED=1
+       -D CONFIG_BT_NIMBLE_ENABLED=1
+       -D WIFI_SSID='"YourNetworkName"'
+       -D WIFI_PASSWORD='"YourSecurePassword"'
+   ```
+   
+   **Note:** The double quotes inside single quotes are required for proper string handling.
+
+2. **Alternative: Use a separate config file** (also add to `.gitignore`):
+   Create `wifi_credentials.ini` with your credentials, then include it in `platformio.ini`:
+   ```ini
+   extra_configs = wifi_credentials.ini
    ```
 
-2. **WiFi features**:
-   - Automatic connection on startup
-   - Automatic reconnection if connection is lost
-   - Connection timeout and retry logic
-   - Status monitoring and reporting
+### Simple Configuration (Development Only)
 
-3. **WiFi status information**:
-   - IP address
-   - MAC address
-   - Signal strength (RSSI)
-   - Connection state
+For quick testing, you can set credentials in `include/wifi_manager.h`, but **never commit real credentials to version control**:
+   ```cpp
+   #define WIFI_SSID        "YourSSID"
+   #define WIFI_PASSWORD    "YourPassword"
+   ```
+
+### WiFi Features
+
+- Automatic connection on startup
+- Automatic reconnection if connection is lost
+- Connection timeout and retry logic
+- Status monitoring and reporting
+
+### WiFi Status Information
+
+- IP address
+- MAC address
+- Signal strength (RSSI)
+- Connection state
 
 The WiFi manager will automatically attempt to connect during startup and maintain the connection. Status updates are printed to the serial monitor every 30 seconds.
 

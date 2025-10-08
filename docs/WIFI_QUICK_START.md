@@ -2,20 +2,41 @@
 
 This is a quick reference for getting WiFi up and running on your ESP32-S3.
 
-## 1. Configure WiFi Credentials
+## 1. Configure WiFi Credentials (Secure Method)
+
+### Option A: Using platformio.ini (Recommended for Security)
+
+Edit `platformio.ini` and add your credentials to the `build_flags`:
+
+```ini
+[env:esp32-s3-devkitc-1-n16r8]
+platform = espressif32
+board = esp32-s3-devkitc-1
+framework = arduino
+build_flags = 
+    -D CONFIG_BT_ENABLED=1
+    -D CONFIG_BT_NIMBLE_ENABLED=1
+    -D CONFIG_BT_BLUEDROID_ENABLED=0
+    -D CONFIG_BT_CONTROLLER_ENABLED=1
+    -D CORE_DEBUG_LEVEL=3
+    -D WIFI_SSID='"MyHomeNetwork"'
+    -D WIFI_PASSWORD='"MySecurePassword123"'
+```
+
+**Important:** The double quotes inside single quotes are required!
+
+**Security tip:** Add `platformio.ini` to `.gitignore` or use a separate credentials file that is gitignored.
+
+### Option B: Direct in Code (Development Only)
 
 Edit `include/wifi_manager.h` and change these lines:
 
 ```cpp
-#define WIFI_SSID        "YourSSID"        // Your WiFi network name
-#define WIFI_PASSWORD    "YourPassword"    // Your WiFi password
-```
-
-**Example:**
-```cpp
 #define WIFI_SSID        "MyHomeNetwork"
 #define WIFI_PASSWORD    "MySecurePassword123"
 ```
+
+**Warning:** Never commit real credentials to version control!
 
 ## 2. Build and Upload
 

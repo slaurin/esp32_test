@@ -5,6 +5,9 @@
 .vscode/launch.json
 .vscode/ipch
 
+# WiFi Credentials - Keep secure!
+wifi_credentials.ini
+
 # ESP-IDF
 build/
 sdkconfig
